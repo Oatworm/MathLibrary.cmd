@@ -106,6 +106,40 @@ GOTO :EOF
 		SET _SStart=%%M
 		SET _mSStart=%%N
 	)
+	
+	:: Get leading 0 out - if we don't, CMD will think we're doing math against
+	:: an improperly formatted octal number and behave erratically.
+	IF %_HEnd:~0,1% EQU 0 (
+		SET _HEnd=%_HEnd:~1,1%
+	)
+	IF %_MEnd:~0,1% EQU 0 (
+		SET _MEnd=%_MEnd:~1,1%
+	)
+	IF %_SEnd:~0,1% EQU 0 (
+		SET _SEnd=%_SEnd:~1,1%
+	)
+	IF %_mSEnd:~0,1% EQU 0 (
+		SET _mSEnd=%_mSEnd:~1,1%
+	)
+	
+	IF %_HStart:~0,1% EQU 0 (
+		SET _HStart=%_HStart:~1,1%
+	)
+	IF %_MStart:~0,1% EQU 0 (
+		SET _MStart=%_MStart:~1,1%
+	)
+	IF %_SStart:~0,1% EQU 0 (
+		SET _SStart=%_SStart:~1,1%
+	)
+	IF %_mSStart:~0,1% EQU 0 (
+		SET _mSStart=%_mSStart:~1,1%
+	)
+	
+	SET _mSElapsed=
+	SET _SElapsed=
+	SET _MElapsed=
+	SET _HElapsed=
+	SET _TimeElapsed=
 
 	SET /A _mSElapsed=_mSEnd-_mSStart
 	IF %_mSElapsed% LSS 0 (
