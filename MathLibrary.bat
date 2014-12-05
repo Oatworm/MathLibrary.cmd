@@ -143,6 +143,8 @@ GOTO :EOF
 		IF NOT DEFINED _DivResDecPos SET /A _DivResDecPos=_DivResTmp
 		SET /A "_DivResDecPos=_DivResDecPos-_DivNRtoL+_DivDRtoL"
 		CALL :ExtReDecimal _DivResult _DivResLen !_DivResDecPos!
+	) ELSE (
+		CALL :ExtDim %_DivResult% _DivResLen _DivResTmp
 	)
 	
 	:ExtDivStripLeadingZeroes
