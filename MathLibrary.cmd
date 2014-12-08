@@ -1,14 +1,14 @@
 @ECHO OFF
 
-:: MathLibrary.bat
+:: MathLibrary.cmd
 :: David Colborne - david@colbornemmx.com
 
-:: https://github.com/Oatworm/MathLibrary.bat
+:: https://github.com/Oatworm/MathLibrary.cmd
 :: This project is licensed using the Simplified BSD license.
 :: For additional details, see the LICENSE file on GitHub.
 
-:: To use MathLibrary.bat, simply call it:
-:: 		MathLibrary.bat 1 / 2
+:: To use MathLibrary.cmd, simply call it:
+:: 		MathLibrary.cmd 1 / 2
 :: It will (eventually) return: 
 :: 		0.5
 
@@ -22,7 +22,7 @@
 	:: %4 - Result (optional - passed by reference)
 	::
 	:: Example invocation:
-	:: CALL MathLibrary.bat 1 + 2 _Result
+	:: CALL MathLibrary.cmd 1 + 2 _Result
 	:: |--> Adds 1+2 and saves result in _Result
 
 	SET _Num1=%1
