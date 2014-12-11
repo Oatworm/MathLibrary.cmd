@@ -75,8 +75,8 @@ GOTO :EOF
 	SET _DivD=%2
 	SET _DivResult=
 	SET _IntLen=1
-	SET /A _DivNRtoL=0
-	SET /A _DivDRtoL=0
+	SET _DivNRtoL=0
+	SET _DivDRtoL=0
 
 	CALL :ExtDim %_DivN% _DivNLen _DivNDec
 	CALL :ExtDim %_DivD% _DivDLen _DivDDec
@@ -107,7 +107,7 @@ GOTO :EOF
 	)
 	
 	:: Long division time...
-	SET /A _DivLoop=0
+	SET _DivLoop=0
 	SET _DivCoef=
 	SET _DivResDecPos=
 	
@@ -148,8 +148,8 @@ GOTO :EOF
 	)
 	
 	:ExtDivStripLeadingZeroes
-		SET /A _Zero=0
-		SET /A _IntLen=2
+		SET _Zero=0
+		SET _IntLen=2
 		CALL SET _DivLInt=%%_DivResult:~%_Zero%,%_IntLen%%%
 		SET _DivLInt0=%_DivLInt:~0,1%
 		SET _DivLInt1=%_DivLInt:~1,1%
@@ -179,8 +179,8 @@ GOTO :EOF
 	SET _Mul1=%1
 	SET _Mul2=%2
 	SET _MulResult=0
-	SET /A _MulCarry=0
-	SET /A _IntLen=1
+	SET _MulCarry=0
+	SET _IntLen=1
 	
 	CALL :ExtDim %_Mul1% _MulLen1 _MulDec1
 	CALL :ExtDim %_Mul2% _MulLen2 _MulDec2
@@ -188,7 +188,7 @@ GOTO :EOF
 	IF %_MulDec1% LEQ %_MulLen1% (
 		CALL :ExtUnDecimal _Mul1
 		SET /A _MulDecPos1=_MulLen1-_MulDec1
-		SET /A _MulDecPos2=0
+		SET _MulDecPos2=0
 		SET /A _MulLen1-=1
 		SET _MulDecFlag=1
 	)
@@ -196,7 +196,7 @@ GOTO :EOF
 	IF %_MulDec2% LEQ %_MulLen2% (
 		CALL :ExtUnDecimal _Mul2
 		SET /A _MulDecPos2=_MulLen2-_MulDec2
-		IF NOT DEFINED _MulDecPos1 SET /A _MulDecPos1=0
+		IF NOT DEFINED _MulDecPos1 SET _MulDecPos1=0
 		SET /A _MulLen2-=1
 		SET _MulDecFlag=1
 	)
@@ -204,7 +204,7 @@ GOTO :EOF
 	FOR /L %%G IN (%_MulLen1%,-1,1) DO (
 		SET /A _BMulPos=%%G-1
 		SET _MulColRes=
-		SET /A _MulCarry=0
+		SET _MulCarry=0
 		SET /A _MulCol=%%G+1
 
 		FOR /L %%H IN (!_MulCol!,1,%_MulLen1%) DO SET _MulColRes=0!_MulColRes!
@@ -251,8 +251,8 @@ GOTO :EOF
 	:: |--> Subtracts _Num2 from _Num1 and saves result in _Result
 
 	SET _SubtractResult=
-	SET /A _SubtractCarry=0
-	SET /A _IntLen=1
+	SET _SubtractCarry=0
+	SET _IntLen=1
 	
 	CALL :ExtCompare %1 %2 _SubComResult
 	
@@ -278,18 +278,18 @@ GOTO :EOF
 		) ELSE (
 			SET /A _SubtractByPos=_SubtractIntM-_SubtractIntS-_SubtractCarry
 			IF !_SubtractByPos! LSS 0 (
-				SET /A _SubtractCarry=1
+				SET _SubtractCarry=1
 				SET /A _SubtractByPos+=10
 			) ELSE (
-				SET /A _SubtractCarry=0
+				SET _SubtractCarry=0
 			)
 			SET _SubtractResult=!_SubtractByPos!!_SubtractResult!
 		)
 	)
 	
 	:ExtSubtractStripLeadingZeroes
-		SET /A _Zero=0
-		SET /A _IntLen=2
+		SET _Zero=0
+		SET _IntLen=2
 		CALL SET _SubtractLInt=%%_SubtractResult:~%_Zero%,%_IntLen%%%
 		SET _SubtractLInt0=%_SubtractLInt:~0,1%
 		SET _SubtractLInt1=%_SubtractLInt:~1,1%
@@ -321,8 +321,8 @@ GOTO :EOF
 	SET _Add1=%1
 	SET _Add2=%2
 	SET _AddResult=
-	SET /A _AddCarry=0
-	SET /A _IntLen=1
+	SET _AddCarry=0
+	SET _IntLen=1
 	
 	CALL :ExtMatchPad _Add1 _Add2
 	CALL :ExtDim %_Add1% _AddLen _AddDec
@@ -336,10 +336,10 @@ GOTO :EOF
 		) ELSE (
 			SET /A _AddByPos=_AddInt1+_AddInt2+_AddCarry
 			IF !_AddByPos! GEQ 10 (
-				SET /A _AddCarry=1
+				SET _AddCarry=1
 				SET /A _AddByPos-=10
 			) ELSE (
-				SET /A _AddCarry=0
+				SET _AddCarry=0
 			)
 			SET _AddResult=!_AddByPos!!_AddResult!
 		)
@@ -367,7 +367,7 @@ GOTO :EOF
 	SET _Com1=%1
 	SET _Com2=%2
 	SET _ComLen=
-	SET /A _IntLen=1
+	SET _IntLen=1
 	SET _ComResult=EQU
 	
 	CALL :ExtMatchPad _Com1 _Com2
@@ -414,7 +414,7 @@ GOTO :EOF
 
 	CALL :ExtDim %_UnDNum% _UnDLen _UnDDec
 	IF %_UnDDec% LEQ %_UnDLen% (
-		SET /A _UnD0=0
+		SET _UnD0=0
 		SET /A _UnDLLen=_UnDDec-1
 		SET /A _UnDRLen=_UnDLen-_UnDDec
 		CALL SET _UnDLeft=%%_UnDNum:~!_UnD0!,!_UnDLLen!%%
@@ -451,7 +451,7 @@ GOTO :EOF
 	SET _ReDResult=
 	
 	IF %_ReDPos% LEQ %_ReDLen% (
-		SET /A _ReD0=0
+		SET _ReD0=0
 		SET /A _ReDLLen=_ReDPos-1
 		SET /A _ReDLen+=1
 		CALL SET _ReDLeft=%%_ReDNum:~!_ReD0!,!_ReDLLen!%%
@@ -586,15 +586,15 @@ GOTO :EOF
 	:: Example invocation:
 	:: CALL :ExtDim %_Num% _Len _Dec
 	
-	SET /A _DimLength=0
-	SET /A _DimDecimal=-1
+	SET _DimLength=0
+	SET _DimDecimal=-1
 	SET _DimArg=%1
-	SET /A _DimPos=1
+	SET _DimPos=1
 	:DimLoop
 		CALL SET _DimLCheck=%%_DimArg:~%_DimLength%,%_DimPos%%%
 		IF NOT DEFINED _DimLCheck GOTO ExitDimLoop
 		SET /A _DimLength+=1
-		IF %_DimLCheck%==. SET /A _DimDecimal=%_DimLength%
+		IF %_DimLCheck%==. SET _DimDecimal=%_DimLength%
 	GOTO DimLoop
 	:ExitDimLoop
 	IF %_DimDecimal% EQU -1 SET /A "_DimDecimal=_DimLength+1"
