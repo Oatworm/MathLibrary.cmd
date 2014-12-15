@@ -323,7 +323,28 @@ GOTO :EOF
 	SET _AddResult=
 	SET _AddCarry=0
 	SET _IntLen=1
+	SET _AddNegFlag=0
 	
+	IF %_Add1:~0,1%==- (
+		IF %_Add2:~0,1%==- (
+			SET _AddNegFlag=1
+			SET _Add1=%_Add1:~1%
+			SET _Add2=%_Add2:~1%
+			GOTO ExtAddNums
+		) ELSE (
+			SET _Add1=%_Add1:~1%
+			CALL :ExtSubtract %_Add2% !_Add1! _AddResult
+			GOTO ExtAddReturnResult
+		)
+	) ELSE (
+		IF %_Add2:~0,1%==- (
+			SET _Add2=%_Add2:~1%
+			CALL :ExtSubtract %_Add1% !_Add2! _AddResult
+			GOTO ExtAddReturnResult
+		)
+	)
+	
+	:ExtAddNums
 	CALL :ExtMatchPad _Add1 _Add2
 	CALL :ExtDim %_Add1% _AddLen _AddDec
 
@@ -346,7 +367,9 @@ GOTO :EOF
 	)
 
 	IF %_AddCarry% EQU 1 SET _AddResult=1%_AddResult%
+	IF %_AddNegFlag% EQU 1 SET _AddResult=-%_AddResult%
 
+	:ExtAddReturnResult
 	ENDLOCAL & SET %3=%_AddResult%
 GOTO :EOF
 
@@ -369,7 +392,26 @@ GOTO :EOF
 	SET _ComLen=
 	SET _IntLen=1
 	SET _ComResult=EQU
+	SET _ComNegFlag=0
 	
+	IF %_Com1:~0,1%==- (
+		IF NOT %_Com2:~0,1%==- (
+			SET _ComResult=LSS
+			GOTO ExtCompareReturnResult
+		) ELSE (
+			SET _ComNegFlag=1
+			SET _Com1=%_Com1:~1%
+			SET _Com2=%_Com2:~1%
+			GOTO ExtCompareCheck
+		)
+	)
+	
+	IF %_Com2:~0,1%==- (
+		SET _ComResult=GTR
+		GOTO ExtCompareReturnResult
+	)
+	
+	:ExtCompareCheck
 	CALL :ExtMatchPad _Com1 _Com2
 	CALL :ExtDim %_Com1% _ComLen _ComDec
 	
@@ -380,13 +422,19 @@ GOTO :EOF
 		IF NOT !_ComLInt!==. (
 			IF !_ComLInt! LSS !_ComRInt! (
 				SET _ComResult=LSS
-				GOTO :ExtCompareReturnResult
+				GOTO ExtCompareCheckNeg
 			)
 			IF !_ComLInt! GTR !_ComRInt! (
 				SET _ComResult=GTR
-				GOTO :ExtCompareReturnResult
+				GOTO ExtCompareCheckNeg
 			)
 		)
+	)
+	
+	:ExtCompareCheckNeg
+	IF %_ComNegFlag% EQU 1 (
+		IF %_ComResult%==GTR SET _ComResult=LSS
+		IF %_ComResult%==LSS SET _ComResult=GTR
 	)
 	
 	:ExtCompareReturnResult
