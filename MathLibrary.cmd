@@ -253,17 +253,45 @@ GOTO :EOF
 	SET _SubtractResult=
 	SET _SubtractCarry=0
 	SET _IntLen=1
+	SET _SubNegChk1=%1
+	SET _SubNegChk2=%2
+	SET _SubtractNegSwap=0
 	
-	CALL :ExtCompare %1 %2 _SubComResult
-	
-	IF !_SubComResult!==LSS (
-		SET _SubtractM=%2
-		SET _SubtractS=%1
-		SET _SubtractNegSwap=1
+	IF %_SubNegChk1:~0,1%==- (
+		IF NOT %_SubNegChk2:~0,1%==- (
+			SET _SubtractNegSwap=1
+			SET _SubtractM=%_SubNegChk1:~1%
+			SET _SubtractS=%_SubNegChk2%
+			CALL :ExtAdd !_SubtractM! !_SubtractS! _SubtractResult
+			GOTO ExtSubtractReturnResult
+		) ELSE (
+			CALL :ExtCompare %1 %2 _SubComResult
+			IF !_SubComResult!==GTR (
+				SET _SubtractM=%_SubNegChk2:~1%
+				SET _SubtractS=%_SubNegChk1:~1%
+			) ELSE (
+				SET _SubtractM=%_SubNegChk1:~1%
+				SET _SubtractS=%_SubNegChk2:~1%
+				SET _SubtractNegSwap=1
+			)
+		)
 	) ELSE (
-		SET _SubtractM=%1
-		SET _SubtractS=%2
-		SET _SubtractNegSwap=0
+		IF %_SubNegChk2:~0,1%==- (
+			SET _SubtractM=%_SubNegChk1%
+			SET _SubtractS=%_SubNegChk2:~1%
+			CALL :ExtAdd !_SubtractM! !_SubtractS! _SubtractResult
+			GOTO ExtSubtractReturnResult
+		) ELSE (
+			CALL :ExtCompare %1 %2 _SubComResult
+			IF !_SubComResult!==LSS (
+				SET _SubtractM=%2
+				SET _SubtractS=%1
+				SET _SubtractNegSwap=1
+			) ELSE (
+				SET _SubtractM=%1
+				SET _SubtractS=%2
+			)
+		)
 	)
 
 	CALL :ExtMatchPad _SubtractM _SubtractS
@@ -301,6 +329,7 @@ GOTO :EOF
 		GOTO ExtSubtractStripLeadingZeroes
 	:ExtSubtractDoneStrippingLeadingZeroes
 
+	:ExtSubtractReturnResult
 	IF %_SubtractNegSwap% EQU 1 SET _SubtractResult=-%_SubtractResult%
 
 	ENDLOCAL & SET %3=%_SubtractResult%
