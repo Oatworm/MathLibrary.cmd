@@ -8,13 +8,14 @@ MathLibrary.cmd was originally written to make it somewhat possible to solve Pro
 MathLibrary.cmd is _not_ a reasonable solution to these problems and should not be used in production by _anyone_. However, if you ever woke up and asked yourself, "Is it possible to get CMD to do floating point math on arbitrarily large numbers without leaving the CMD environment?", this project should answer that question in the affirmative. 
 
 ###VERSION HISTORY
+* 0.1
+  * Added negative number support to all functions.
 * 0.0 (Initial Sync)
   * Addition, subtraction, multiplication and division of positive arbitrarily large floating point numbers.
   * Does the math like an elementary school student - slowly and column by column via string manipulation.
 
 ###TODO
 * Finish UnitTest.cmd to facilitate easier troubleshooting.
-* Add negative number support.
 * Use CMD's built-in math abilities more efficiently. Namely...
   * Rewrite ExtAdd and ExtSubtract to use 8-digit blocks, instead of performing math column by column.
   * Rewrite ExtMultiply to use 4-digit blocks, instead of performing multiplication column by column.
