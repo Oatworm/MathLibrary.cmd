@@ -77,6 +77,22 @@ GOTO :EOF
 	SET _IntLen=1
 	SET _DivNRtoL=0
 	SET _DivDRtoL=0
+	SET _DivNegFlag=0
+	
+	IF %_DivN:~0,1%==- (
+		IF %_DivD:~0,1%==- (
+			SET _DivN=%_DivN:~1%
+			SET _DivD=%_DivD:~1%
+		) ELSE (
+			SET _DivN=%_DivN:~1%
+			SET _DivNegFlag=1
+		)
+	) ELSE (
+		IF %_DivD:~0,1%==- (
+			SET _DivD=%_DivD:~1%
+			SET _DivNegFlag=1
+		)
+	)
 
 	CALL :ExtDim %_DivN% _DivNLen _DivNDec
 	CALL :ExtDim %_DivD% _DivDLen _DivDDec
@@ -161,6 +177,8 @@ GOTO :EOF
 		GOTO ExtDivStripLeadingZeroes
 	:ExtDivDoneStrippingLeadingZeroes
 	
+	:ExtDivisionReturnResult
+	IF %_DivNegFlag%==1 SET _DivResult=-%_DivResult%
 	ENDLOCAL & SET %3=%_DivResult%
 GOTO :EOF
 
@@ -181,6 +199,22 @@ GOTO :EOF
 	SET _MulResult=0
 	SET _MulCarry=0
 	SET _IntLen=1
+	SET _MulNegFlag=0
+	
+	IF %_Mul1:~0,1%==- (
+		IF %_Mul2:~0,1%==- (
+			SET _Mul1=%_Mul1:~1%
+			SET _Mul2=%_Mul2:~1%
+		) ELSE (
+			SET _Mul1=%_Mul1:~1%
+			SET _MulNegFlag=1
+		)
+	) ELSE (
+		IF %_Mul2:~0,1%==- (
+			SET _Mul2=%_Mul2:~1%
+			SET _MulNegFlag=1
+		)
+	)
 	
 	CALL :ExtDim %_Mul1% _MulLen1 _MulDec1
 	CALL :ExtDim %_Mul2% _MulLen2 _MulDec2
@@ -234,6 +268,8 @@ GOTO :EOF
 		CALL :ExtReDecimal _MulResult _MulResLen !_MulResDec!
 	)
 	
+	:ExtMultiplyReturnResult
+	IF %_MulNegFlag%==1 SET _MulResult=-%_MulResult%
 	ENDLOCAL & SET %3=%_MulResult%
 GOTO :EOF
 
