@@ -34,16 +34,25 @@ FOR /L %%G IN (1,1,1000) DO (
 )
 SET _For1End=!time!
 
+SET _Control1Start=!time!
+FOR /L %%G IN (1,1,1000) DO (
+	SET _Test1=00000%%G
+)
+SET _Control1End=!time!
+
 SET _Mod1Elapsed=
 SET _If1Elapsed=
 SET _For1Elapsed=
+SET _Control1Elapsed=
 
 CALL :CalcTime %_Mod1Start% %_Mod1End% _Mod1Elapsed
 CALL :CalcTime %_If1Start% %_If1End% _If1Elapsed
 CALL :CalcTime %_For1Start% %_For1End% _For1Elapsed
+CALL :CalcTime %_Control1Start% %_Control1End% _Control1Elapsed
 ECHO:Mod:%_Mod1Elapsed%
 ECHO: If:%_If1Elapsed%
 ECHO:For:%_For1Elapsed%
+ECHO:Con:%_Control1Elapsed%
 
 ECHO.
 ECHO:Testing 2-digit block (000000012)...
