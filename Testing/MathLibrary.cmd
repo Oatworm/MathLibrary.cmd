@@ -117,9 +117,14 @@ GOTO :EOF
 	)
 	
 	:: Multiplication is expensive - let's do it as little as needed.
+	:: Meaning NEVER.
 	SET _DivD_1=%_DivD%
+	SET _DivD_L_1=%_DivDLen%
+	SET _DivD_D_1=%_DivDDec%
+	SET _DivD_Prev=%_DivD%
 	FOR /L %%G IN (2,1,9) DO (
-		CALL :ExtMultiply %_DivD% %%G _DivD_%%G
+		CALL :ExtAdd !_DivD_Prev! %_DivD% _DivD_%%G
+		SET _DivD_Prev=!_DivD_%%G!
 		CALL :ExtDim !_DivD_%%G! _DivD_L_%%G _DivD_D_%%G
 	)
 	
@@ -127,6 +132,8 @@ GOTO :EOF
 	SET _DivLoop=0
 	SET _DivCoef=
 	SET _DivResDecPos=
+	SET _DivCoef_L=0
+	SET _DivCoef_D=1
 	
 	:ExtDivisionLoop
 		IF %_DivLoop% GTR %_DivMaxPrec% GOTO ExtEndDivisionLoop
@@ -139,12 +146,15 @@ GOTO :EOF
 			IF NOT DEFINED _DivResDecPos SET /A _DivResDecPos=_DivLoop+1
 		)
 		SET _DivCoef=%_DivCoef%%_DivCol%
+		SET /A _DivCoef_L+=1
+		SET /A _DivCoef_D+=1
 		IF %_DivCoef% EQU 0 GOTO ExtContinueDivLoop
 		FOR /L %%H IN (9,-1,1) DO (
-			CALL :ExtCompare !_DivD_%%H! %_DivCoef% _DivInComp !_DivD_L_%%H! !_DivD_D_%%H!
+			CALL :ExtCompare !_DivD_%%H! %_DivCoef% _DivInComp !_DivD_L_%%H! !_DivD_D_%%H! %_DivCoef_L% %_DivCoef_D%
 			IF NOT !_DivInComp!==GTR (
 				SET _DivResCol=%%H
 				CALL :ExtSubtract %_DivCoef% !_DivD_%%H! _DivCoef
+				CALL :ExtDim !_DivCoef! _DivCoef_L _DivCoef_D
 				GOTO ExtContinueDivLoop
 			)
 		)
