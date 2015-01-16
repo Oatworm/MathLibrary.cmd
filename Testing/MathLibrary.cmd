@@ -133,8 +133,7 @@ GOTO :EOF
 		SET _DivResCol=0
 		CALL SET _DivCol=%%_DivN:~%_DivLoop%,%_IntLen%%%
 		IF NOT DEFINED _DivCol (
-			CALL :ExtCompare 0 %_DivCoef% _DivCoefComp 1 2
-			IF !_DivCoefComp!==EQU GOTO ExtEndDivisionLoop
+			IF [%_DivCoef%]==[0] GOTO ExtEndDivisionLoop
 			SET _DivCol=0
 			SET _DivDecFlag=1
 			IF NOT DEFINED _DivResDecPos SET /A _DivResDecPos=_DivLoop+1
