@@ -292,6 +292,8 @@ GOTO :EOF
 	SET _SubNegChk1=%1
 	SET _SubNegChk2=%2
 	SET _SubtractNegSwap=0
+	SET _Zero=0
+	SET _One=1
 	
 	IF %_SubNegChk1:~0,1%==- (
 		IF NOT %_SubNegChk2:~0,1%==- (
@@ -351,18 +353,36 @@ GOTO :EOF
 		)
 	)
 	
+	CALL :ExtDim %_SubtractResult% _SubtractResLen _SubtractResDec
+	IF %_SubtractResDec% GTR %_SubtractResLen% GOTO ExtSubtractDoneStrippingTrailingZeroes
+	:ExtSubtractStripTrailingZeroes
+		SET /A _SubStripMax=_SubtractResLen-_SubtractResDec+1
+		SET _SubStripOff=0
+		FOR /L %%G IN (1,1,%_SubStripMax%) DO (
+			SET _SubStripPos=%%G
+			CALL SET _SubZChk=%%_SubtractResult:~-!_SubStripPos!,%_One%%%
+			IF NOT !_SubZChk!==0 (
+				GOTO ExtSubtractFoundTrailingZeroes
+			) ELSE SET _SubStripOff=%%G
+		)
+	:ExtSubtractFoundTrailingZeroes
+		IF %_SubZChk%==. SET /A _SubStripOff+=1
+		CALL SET _SubtractResult=%%_SubtractResult:~%_Zero%,-%_SubStripOff%%%
+    :ExtSubtractDoneStrippingTrailingZeroes
+	
 	:ExtSubtractStripLeadingZeroes
-		SET _Zero=0
-		SET _IntLen=2
-		CALL SET _SubtractLInt=%%_SubtractResult:~%_Zero%,%_IntLen%%%
-		SET _SubtractLInt0=%_SubtractLInt:~0,1%
-		SET _SubtractLInt1=%_SubtractLInt:~1,1%
-		IF NOT %_SubtractLInt0%==0 GOTO ExtSubtractDoneStrippingLeadingZeroes
-		IF NOT DEFINED _SubtractLInt1 GOTO ExtSubtractDoneStrippingLeadingZeroes
-		IF %_SubtractLInt1%==. GOTO ExtSubtractDoneStrippingLeadingZeroes
-		SET /A _SubtractLen-=1
-		CALL SET _SubtractResult=%%_SubtractResult:~-%_SubtractLen%%%
-		GOTO ExtSubtractStripLeadingZeroes
+		CALL :ExtDim %_SubtractResult% _SubtractResLen _SubtractResDec
+		IF %_SubtractResLen% GTR %_SubtractResDec% (
+			SET /A _SubStripLoopLen=%_SubtractResDec%-2
+		) ELSE SET /A _SubStripLoopLen=%_SubtractResLen%-1
+		FOR /L %%G IN (0,1,%_SubStripLoopLen%) DO (
+			SET _SubStripPos=%%G
+			SET _SubStripOff=%%G
+			CALL SET _SubZChk=%%_SubtractResult:~!_SubStripPos!,%_One%%%
+			IF NOT !_SubZChk!==0 GOTO ExtSubtractFoundLeadingZeroes
+		)
+	:ExtSubtractFoundLeadingZeroes
+		CALL SET _SubtractResult=%%_SubtractResult:~%_SubStripOff%%%
 	:ExtSubtractDoneStrippingLeadingZeroes
 
 	:ExtSubtractReturnResult
