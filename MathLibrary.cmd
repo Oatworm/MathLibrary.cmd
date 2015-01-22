@@ -62,7 +62,7 @@ GOTO :EOF
 :ExtDivision
 	SETLOCAL EnableDelayedExpansion
 	:: Used to divide arbitrary numbers together
-	:: Requires - :ExtDim, :ExtMatchPad, :ExtMultiply
+	:: Requires - :ExtDim, :ExtMatchPad, :ExtUnDecimal, :ExtCompare, :ExtSubtract, :ExtAdd, :ExtPad
 	:: Accepts three parameters:
 	:: %1, %2 - The numerator and denominator, respectively (passed by value)
 	:: %3 - The result (passed by reference)
