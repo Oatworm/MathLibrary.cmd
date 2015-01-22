@@ -106,6 +106,8 @@ GOTO :EOF
 	IF %_DivDDec% LEQ %_DivDLen% (
 		CALL :ExtUnDecimal _DivD %_DivDLen% %_DivDDec%
 		SET /A _DivDRtoL=_DivDLen-_DivDDec
+		SET /A _DivD_L_1=_DivDLen-1
+		SET /A _DivD_D_1=_DivD_L_1+1
 		SET _DivDecFlag=1
 	)
 	
@@ -117,10 +119,10 @@ GOTO :EOF
 	)
 	
 	:: Multiplication is expensive - let's do it as little as needed.
-	:: Meaning NEVER.
+	:: Meaning NEVER.	
 	SET _DivD_1=%_DivD%
-	SET _DivD_L_1=%_DivDLen%
-	SET _DivD_D_1=%_DivDDec%
+	IF NOT DEFINED _DivD_L_1 SET _DivD_L_1=%_DivDLen%
+	IF NOT DEFINED _DivD_D_1 SET _DivD_D_1=%_DivDDec%
 	SET _DivD_Prev=%_DivD%
 	FOR /L %%G IN (2,1,9) DO (
 		CALL :ExtAdd !_DivD_Prev! %_DivD% _DivD_%%G
@@ -145,11 +147,17 @@ GOTO :EOF
 			SET _DivDecFlag=1
 			IF NOT DEFINED _DivResDecPos SET /A _DivResDecPos=_DivLoop+1
 		)
-		SET _DivCoef=%_DivCoef%%_DivCol%
-		SET /A _DivCoef_L+=1
-		SET /A _DivCoef_D+=1
+		IF NOT [%_DivCoef%]==[0] (
+			SET _DivCoef=%_DivCoef%%_DivCol%
+			SET /A _DivCoef_L+=1
+			SET /A _DivCoef_D+=1
+		) ELSE (
+			SET _DivCoef=%_DivCol%
+			SET /A _DivCoef_L=1
+			SET /A _DivCoef_D=2
+		)
 		IF %_DivCoef% EQU 0 GOTO ExtContinueDivLoop
-		FOR /L %%H IN (9,-1,1) DO (
+		FOR /L %%H IN (9,-1,0) DO (
 			CALL :ExtCompare !_DivD_%%H! %_DivCoef% _DivInComp !_DivD_L_%%H! !_DivD_D_%%H! %_DivCoef_L% %_DivCoef_D%
 			IF NOT !_DivInComp!==GTR (
 				SET _DivResCol=%%H
@@ -169,10 +177,14 @@ GOTO :EOF
 		IF NOT DEFINED _DivResDecPos SET /A _DivResDecPos=_DivResTmp
 		SET /A "_DivResDecPos=_DivResDecPos-_DivNRtoL+_DivDRtoL"
 		CALL :ExtReDecimal _DivResult _DivResLen !_DivResDecPos!
+		SET /A _DivRightPad=_DivDRtoL-_DivNRtoL-_DivResLen+_DivDLen
+		IF !_DivRightPad! GTR 0 (
+			CALL :ExtPad _DivResult !_DivRightPad! R _DivResLen _DivResDecPos
+		)
 	) ELSE (
 		CALL :ExtDim %_DivResult% _DivResLen _DivResTmp
 	)
-	
+
 	:ExtDivStripLeadingZeroes
 		SET _Zero=0
 		SET _IntLen=2
