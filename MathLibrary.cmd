@@ -536,9 +536,9 @@ GOTO :EOF
 	) ELSE CALL :ExtDim %_Com1% _Com1Len _Com1Dec
 	
 	SET /A _Com1IntLen=_Com1Len-_Com1Dec
-	IF %_Com1IntLen%==-1 SET _Com1IntLen=%_Com1Len%
+	IF %_Com1IntLen%==-1 (SET _Com1IntLen=%_Com1Len%) ELSE (SET /A _Com1IntLen=_Com1Len-_Com1IntLen-1)
 	SET /A _Com2IntLen=_Com2Len-_Com2Dec
-	IF %_Com2IntLen%==-1 SET _Com2IntLen=%_Com2Len%
+	IF %_Com2IntLen%==-1 (SET _Com2IntLen=%_Com2Len%) ELSE (SET /A _Com2IntLen=_Com2Len-_Com2IntLen-1)
 	
 	IF %_Com1IntLen% GTR %_Com2IntLen% (
 		SET _ComResult=GTR
