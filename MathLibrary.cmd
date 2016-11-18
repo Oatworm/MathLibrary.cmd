@@ -802,14 +802,16 @@ GOTO :EOF
 	SET _DimLength=0
 	SET _DimDecimal=-1
 	SET _DimArg=%1
-	SET _DimPos=1
-	:DimLoop
-		CALL SET _DimLCheck=%%_DimArg:~%_DimLength%,%_DimPos%%%
-		IF NOT DEFINED _DimLCheck GOTO ExitDimLoop
+	FOR %%G IN (0,1,2,3,4,5,6,7,8,9,.) DO (
+		SET _DimArg=!_DimArg:%%G=%%G !
+	)
+	
+	FOR %%G IN (%_DimArg%) DO (
 		SET /A _DimLength+=1
-		IF %_DimLCheck%==. SET _DimDecimal=%_DimLength%
-	GOTO DimLoop
-	:ExitDimLoop
+		IF "%%G"=="." (
+			SET _DimDecimal=!_DimLength!
+		)
+	)
 	IF %_DimDecimal% EQU -1 SET /A "_DimDecimal=_DimLength+1"
 	ENDLOCAL & SET /A %2=%_DimLength% & SET /A %3=%_DimDecimal%
 GOTO :EOF
