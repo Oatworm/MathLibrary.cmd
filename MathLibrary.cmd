@@ -93,6 +93,13 @@ GOTO :EOF
 			SET _DivNegFlag=1
 		)
 	)
+	
+	IF %_DivN:~0,1%==0 (
+		IF NOT %_DivN:~0,1%==%_DivN% SET _DivN=%_DivN:~1%
+	)
+	IF %_DivD:~0,1%==0 (
+		IF NOT %_DivN:~0,1%==%_DivN% SET _DivD=%_DivD:~1%
+	)
 
 	CALL :ExtDim %_DivN% _DivNLen _DivNDec
 	CALL :ExtDim %_DivD% _DivDLen _DivDDec
@@ -110,7 +117,7 @@ GOTO :EOF
 		SET /A _DivD_D_1=_DivD_L_1+1
 		SET _DivDecFlag=1
 	)
-	
+
 	:: Set max precision here!
 	IF %_DivNLen% GEQ %_DivDLen% (
 		SET /A _DivMaxPrec=_DivNLen+10
@@ -153,8 +160,8 @@ GOTO :EOF
 			SET /A _DivCoef_D+=1
 		) ELSE (
 			SET _DivCoef=%_DivCol%
-			SET /A _DivCoef_L=1
-			SET /A _DivCoef_D=2
+			SET _DivCoef_L=1
+			SET _DivCoef_D=2
 		)
 		IF %_DivCoef% EQU 0 GOTO ExtContinueDivLoop
 		FOR /L %%H IN (9,-1,0) DO (
@@ -175,16 +182,17 @@ GOTO :EOF
 	IF DEFINED _DivDecFlag (
 		CALL :ExtDim %_DivResult% _DivResLen _DivResTmp
 		IF NOT DEFINED _DivResDecPos SET /A _DivResDecPos=_DivResTmp
-		SET /A "_DivResDecPos=_DivResDecPos-_DivNRtoL+_DivDRtoL"
+		SET /A _DivResDecPos=_DivResDecPos-_DivNRtoL+_DivDRtoL
 		CALL :ExtReDecimal _DivResult _DivResLen !_DivResDecPos!
-		SET /A _DivRightPad=_DivDRtoL-_DivNRtoL-_DivResLen+_DivDLen
+		rem SET /A _DivRightPad=_DivDRtoL-_DivNRtoL-_DivResLen+_DivDLen
+		SET /A _DivRightPad=_DivResDecPos-_DivResLen-1
 		IF !_DivRightPad! GTR 0 (
 			CALL :ExtPad _DivResult !_DivRightPad! R _DivResLen _DivResDecPos
 		)
 	) ELSE (
 		CALL :ExtDim %_DivResult% _DivResLen _DivResTmp
 	)
-
+	
 	:ExtDivStripLeadingZeroes
 		SET _Zero=0
 		SET _IntLen=2
@@ -238,13 +246,19 @@ GOTO :EOF
 		)
 	)
 	
+	IF %_Mul1:~0,1%==0 (
+		IF NOT %_Mul1:~0,1%==%_Mul1% SET _Mul1=%_Mul1:~1%
+	)
+	IF %_Mul2:~0,1%==0 (
+		IF NOT %_Mul2:~0,1%==%_Mul2% SET _Mul2=%_Mul2:~1%
+	)
+	
 	CALL :ExtDim %_Mul1% _MulLen1 _MulDec1
 	CALL :ExtDim %_Mul2% _MulLen2 _MulDec2
 	
 	IF %_MulDec1% LEQ %_MulLen1% (
 		CALL :ExtUnDecimal _Mul1 %_MulLen1% %_MulDec1%
 		SET /A _MulDecPos1=_MulLen1-_MulDec1
-		SET _MulDecPos2=0
 		SET /A _MulLen1-=1
 		SET _MulDecFlag=1
 	)
@@ -255,6 +269,8 @@ GOTO :EOF
 		IF NOT DEFINED _MulDecPos1 SET _MulDecPos1=0
 		SET /A _MulLen2-=1
 		SET _MulDecFlag=1
+	) ELSE (
+		IF DEFINED _MulDecPos1 SET _MulDecPos2=0
 	)
 
 	FOR /L %%G IN (%_MulLen1%,-1,1) DO (
@@ -287,6 +303,11 @@ GOTO :EOF
 		SET /A _MulDecPos=_MulDecPos1+_MulDecPos2
 		CALL :ExtDim %_MulResult% _MulResLen _MulResDec
 		SET /A _MulResDec=_MulResLen-_MulDecPos+1
+		IF !_MulResDec! EQU 0 (
+			SET _MulResDec=2
+			SET /A _MulResLen+=1
+			SET _MulResult=00!_MulResult!
+		)
 		CALL :ExtReDecimal _MulResult _MulResLen !_MulResDec!
 	)
 	
@@ -353,6 +374,7 @@ GOTO :EOF
 			)
 		)
 	)
+	
 
 	CALL :ExtDim %_SubtractM% _SubtractMLen _SubtractMDec
 	CALL :ExtDim %_SubtractS% _SubtractSLen _SubtractSDec
@@ -390,7 +412,7 @@ GOTO :EOF
 		)
 	:ExtSubtractFoundTrailingZeroes
 		IF %_SubZChk%==. SET /A _SubStripOff+=1
-		CALL SET _SubtractResult=%%_SubtractResult:~%_Zero%,-%_SubStripOff%%%
+		IF %_SubStripOff% GTR 0 CALL SET _SubtractResult=%%_SubtractResult:~%_Zero%,-%_SubStripOff%%%
     :ExtSubtractDoneStrippingTrailingZeroes
 	
 	:ExtSubtractStripLeadingZeroes
@@ -687,7 +709,6 @@ GOTO :EOF
 		SET _MatchPadD1=%6
 	) ELSE CALL :ExtDim %_MatchPad1% _MatchPadL1 _MatchPadD1
 
-
 	:: Add a decimal if one number has a decimal and the other doesn't.
 	IF %_MatchPadD1% GTR %_MatchPadL1% (
 		IF %_MatchPadD2% LEQ %_MatchPadL2% (
@@ -704,23 +725,23 @@ GOTO :EOF
 	IF %_MatchPadD1% GTR %_MatchPadD2% (
 		SET /A "_DPadLen=_MatchPadD1-_MatchPadD2"
 		CALL :ExtPad _MatchPad2 !_DPadLen! L _MatchPadL2 _MatchPadD2
-		SET _MatchPadD=_MatchPadD1
+		SET _MatchPadD=!_MatchPadD1!
 	)
 	IF %_MatchPadD2% GTR %_MatchPadD1% (
 		SET /A "_DPadLen=_MatchPadD2-_MatchPadD1"
 		CALL :ExtPad _MatchPad1 !_DPadLen! L _MatchPadL1 _MatchPadD1
-		SET _MatchPadD=_MatchPadD2
+		SET _MatchPadD=!_MatchPadD2!
 	)
 
 	IF %_MatchPadL1% GTR %_MatchPadL2% (
 		SET /A _LPadLen=_MatchPadL1-_MatchPadL2
 		CALL :ExtPad _MatchPad2 !_LPadLen! R _MatchPadL2 _MatchPadD2
-		SET _MatchPadL=_MatchPadL1
+		SET _MatchPadL=!_MatchPadL1!
 	)
 	IF %_MatchPadL2% GTR %_MatchPadL1% (
 		SET /A _LPadLen=_MatchPadL2-_MatchPadL1
 		CALL :ExtPad _MatchPad1 !_LPadLen! R _MatchPadL1 _MatchPadD1
-		SET _MatchPadL=_MatchPadL2
+		SET _MatchPadL=!_MatchPadL2!
 	)
 	
 	IF NOT DEFINED _MatchPadL SET _MatchPadL=%_MatchPadL1%
@@ -802,6 +823,7 @@ GOTO :EOF
 	SET _DimLength=0
 	SET _DimDecimal=-1
 	SET _DimArg=%1
+	
 	FOR %%G IN (0,1,2,3,4,5,6,7,8,9,.) DO (
 		SET _DimArg=!_DimArg:%%G=%%G !
 	)
@@ -812,6 +834,7 @@ GOTO :EOF
 			SET _DimDecimal=!_DimLength!
 		)
 	)
+
 	IF %_DimDecimal% EQU -1 SET /A "_DimDecimal=_DimLength+1"
 	ENDLOCAL & SET /A %2=%_DimLength% & SET /A %3=%_DimDecimal%
 GOTO :EOF
