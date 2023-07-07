@@ -15,6 +15,12 @@ There are two scripts in this repo:
   * This is the script used to test MathLibrary.cmd's performance and accuracy. You can test individual functions by including the arithmetic symbol as an argument - for example, `UnitTest.cmd +` will run addition tests. If you supply no argument, it'll run all tests.
 
 ###VERSION HISTORY
+* 0.4
+  * First update in several years.
+    * Accepts requested input in a single parameter instead of requiring multiple separate parameters (meaning "1+2" works just as well as "1 + 2").
+      * As of 0.4.0, this works for +, -, *, and /, but does not work for COM.
+    * CMD-style help text now included and displays automatically when invalid input is entered.
+    * Release goal: Square roots!
 * 0.3
   * This is the first release in which division is actually usable.
     * :ExtDivision no longer calls :ExtMultiply - instead, Divisor * (1-10) is handled by incrementing itself via :ExtAdd.
