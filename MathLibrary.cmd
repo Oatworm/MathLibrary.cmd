@@ -17,7 +17,7 @@
 	:: Requires all subroutines listed here.
 	:: Accepts three arguments, passed when script is called:
 	:: %1 - First number
-	:: %2 - Operation to be performed (+, -, *, /)
+	:: %2 - Operation to be performed (+, -, *, /, com)
 	:: %3 - Second number
 	:: %4 - Result (optional - passed by reference)
 	::
@@ -25,30 +25,56 @@
 	:: CALL MathLibrary.cmd 1 + 2 _Result
 	:: |--> Adds 1+2 and saves result in _Result
 
-	SET _Num1=%1
-	SET _Op=%2
-	SET _Num2=%3
 	SET _CmdResult=
+
+    IF [%1]==[] (
+        CALL :ExtHelp
+        GOTO :EOF
+    ) ELSE (SET _Num1=%1)
+
+    :: Did someone type "1+2" instead of "1 + 2"? Let's try and fix that.
+    IF [%2]==[] (
+        SET _OpDelims=+-/*
+        SET _NumDelims=0123456789.
+
+        FOR /F "tokens=1,2 delims=%_OpDelims%" %%G IN ("%1") DO (
+            SET _Num1=%%G
+            SET _Num2=%%H
+        )
+        FOR /F "tokens=1 delims=%_NumDelims%" %%G IN ("%1") DO (SET _Op=%%G)
+    ) ELSE (
+        SET _Op=%2
+        SET _Num2=%3
+    )
+
+    IF [%_Op%]==[] (
+        ECHO:Missing or invalid operator.
+        ECHO.
+        CALL :ExtHelp
+        GOTO :EOF
+    )
+
+    IF [%_Num2%]==[] (
+        ECHO:Missing or invalid operand.
+        ECHO.
+        CALL :ExtHelp
+        GOTO :EOF
+    )
 	
 	IF %_Op%==+ (
 		CALL :ExtAdd %_Num1% %_Num2% _CmdResult
-	)
-	
-	IF %_Op%==- (
+	) ELSE IF %_Op%==- (
 		CALL :ExtSubtract %_Num1% %_Num2% _CmdResult
-	)
-	
-	IF %_Op%==* (
+	) ELSE IF %_Op%==* (
 		CALL :ExtMultiply %_Num1% %_Num2% _CmdResult
-	)
-	
-	IF %_Op%==/ (
-		CALL :ExtDivision %_Num1% %_Num2% _CmdResult
-	)
-	
-	IF /I %_Op%==com (
+	) ELSE IF %_Op%==/ (
+		CALL :ExtDivide %_Num1% %_Num2% _CmdResult
+	) ELSE IF /I %_Op%==com (
 		CALL :ExtCompare %_Num1% %_Num2% _CmdResult
-	)
+    ) ELSE (
+        CALL :ExtHelp
+        GOTO :EOF
+    )
 	
 	IF NOT [%4]==[] (
 		SET %4=%_CmdResult%
@@ -59,7 +85,30 @@
 
 GOTO :EOF
 
-:ExtDivision
+:ExtHelp
+
+    ECHO:MathLibrary.cmd - A collection of math subroutines written in Windows batch script. Includes floating point and large number support.
+    ECHO.
+    ECHO:MathLibrary.cmd operand operator operand [variable]
+    ECHO.
+    ECHO:operator
+    ECHO:   Specifies mathematical operator. Currently supported operators include:
+    ECHO:		+		    Addition
+	ECHO:		-		    Subtraction
+	ECHO:		*		    Multiplication
+	ECHO:		/		    Division
+	ECHO:		com		    Comparison
+    ECHO:		? or /?		Shows this help screen
+    ECHO.
+    ECHO:operand
+    ECHO:   Specifies numbers (integers or floating point) to apply operator against. Note that operands and operators are evaluated using infix notation.
+    ECHO.
+    ECHO:[variable]
+    ECHO:   (Optional) Store the results in the specified variable.
+
+GOTO :EOF
+
+:ExtDivide
 	SETLOCAL EnableDelayedExpansion
 	:: Used to divide arbitrary numbers together
 	:: Requires - :ExtDim, :ExtMatchPad, :ExtUnDecimal, :ExtCompare, :ExtSubtract, :ExtAdd, :ExtPad
@@ -68,7 +117,7 @@ GOTO :EOF
 	:: %3 - The result (passed by reference)
 	::
 	:: Example invocation:
-	:: CALL :ExtDivision %_Num1% %_Num2% _Result
+	:: CALL :ExtDivide %_Num1% %_Num2% _Result
 	:: |--> Divides _Num1 by _Num2 and returns result in _Result
 	
 	SET _DivN=%1
@@ -144,7 +193,7 @@ GOTO :EOF
 	SET _DivCoef_L=0
 	SET _DivCoef_D=1
 	
-	:ExtDivisionLoop
+	:ExtDivideLoop
 		IF %_DivLoop% GTR %_DivMaxPrec% GOTO ExtEndDivisionLoop
 		SET _DivResCol=0
 		CALL SET _DivCol=%%_DivN:~%_DivLoop%,%_IntLen%%%
@@ -176,7 +225,7 @@ GOTO :EOF
 		:ExtContinueDivLoop
 		SET _DivResult=%_DivResult%%_DivResCol%
 		SET /A _DivLoop+=1
-		GOTO ExtDivisionLoop
+		GOTO ExtDivideLoop
 	:ExtEndDivisionLoop
 	
 	IF DEFINED _DivDecFlag (
@@ -207,7 +256,7 @@ GOTO :EOF
 		GOTO ExtDivStripLeadingZeroes
 	:ExtDivDoneStrippingLeadingZeroes
 	
-	:ExtDivisionReturnResult
+	:ExtDivideReturnResult
 	IF %_DivNegFlag%==1 SET _DivResult=-%_DivResult%
 	ENDLOCAL & SET %3=%_DivResult%
 GOTO :EOF
