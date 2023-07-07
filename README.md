@@ -11,6 +11,7 @@ MathLibrary.cmd is _not_ a reasonable solution to these problems and should not 
 There are two scripts in this repo:
 * MathLibrary.cmd
   * This is the script that does all the math. To use it, type in the equation like so: `MathLibrary.cmd 1 + 2`. At the present time, it can also handle subtraction (`MathLibrary.cmd 2 - 1`), multiplication (`MathLibrary.cmd 2 * 1`), division (`MathLibrary.cmd 2 / 1`), and comparison (`MathLibrary.cmd 2 com 1`).
+  * Subroutines in the script can be reused in other scripts. To do so, copy the desired subroutine and all subroutines below it and paste the resulting code into the other script.
 * UnitTest.cmd
   * This is the script used to test MathLibrary.cmd's performance and accuracy. You can test individual functions by including the arithmetic symbol as an argument - for example, `UnitTest.cmd +` will run addition tests. If you supply no argument, it'll run all tests.
 
